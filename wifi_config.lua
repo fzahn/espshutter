@@ -110,7 +110,7 @@ function initmqtt()
 				m:publish(mqttbasetopic .. "4","up",0,0)
 				m:publish(mqttbasetopic .. "5","up",0,0)
 				notBlocked=1
-                moveup(6)
+            moveup(6)
 			end
 		elseif ((data=="down") and (notBlocked==1)) then
 			print("Topic: " .. topic .. " Data: " .. data)
@@ -127,8 +127,18 @@ function initmqtt()
 				m:publish(mqttbasetopic .. "4","down",0,0)
 				m:publish(mqttbasetopic .. "5","down",0,0)
 				notBlocked=1
-                movedown(6)
+            movedown(6)
 			end
+		elseif ((data=="stop") and (notBlocked==1)) then
+			print("Topic: " .. topic .. " Data: " .. data)
+			if topic==mqttbasetopic .. "1" then movestop(1) end
+			if topic==mqttbasetopic .. "2" then movestop(2) end
+			if topic==mqttbasetopic .. "3" then movestop(3) end
+			if topic==mqttbasetopic .. "4" then movestop(4) end
+			if topic==mqttbasetopic .. "5" then movestop(5) end
+			if topic==mqttbasetopic .. "6" then
+            movestop(6)
+			end			
 		elseif ((data=="middle") and (notBlocked==1)) then
 			print("Topic: " .. topic .. " Data: " .. data)
 			if topic==mqttbasetopic .. "1" then movemiddle(1) end
@@ -144,7 +154,7 @@ function initmqtt()
 				m:publish(mqttbasetopic .. "4","middle",0,0)
 				m:publish(mqttbasetopic .. "5","middle",0,0)
 				notBlocked=1
-                movemiddle(6)
+            movemiddle(6)
 			end
 		end		
 	end
