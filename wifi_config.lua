@@ -71,6 +71,14 @@ function movestop(channel)
 	end
 end
 
+function movemiddle(channel)
+	if (notBlocked==1) then
+		notBlocked=0
+		selectChannel(channel)
+		tmr.alarm(3, 2500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_DOWN) end)
+		tmr.alarm(4, 3000, tmr.ALARM_SINGLE, function() pressButton(BUTTON_DOWN) notBlocked=1 end)
+	end
+end
 --MQTT Subsystem
 function initmqtt()
 	m = mqtt.Client("ESP8266", 120, "user", "pass")
