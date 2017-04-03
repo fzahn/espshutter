@@ -130,6 +130,24 @@ function initmqtt()
                 movedown(6)
 			end
 		end
+		elseif ((data=="middle") and (notBlocked==1)) then
+			print("Topic: " .. topic .. " Data: " .. data)
+			if topic==mqttbasetopic .. "1" then movemiddle(1) end
+			if topic==mqttbasetopic .. "2" then movemiddle(2) end
+			if topic==mqttbasetopic .. "3" then movemiddle(3) end
+			if topic==mqttbasetopic .. "4" then movemiddle(4) end
+			if topic==mqttbasetopic .. "5" then movemiddle(5) end
+			if topic==mqttbasetopic .. "6" then
+				notBlocked=0
+				m:publish(mqttbasetopic .. "1","middle",0,0)
+				m:publish(mqttbasetopic .. "2","middle",0,0)
+				m:publish(mqttbasetopic .. "3","middle",0,0)
+				m:publish(mqttbasetopic .. "4","middle",0,0)
+				m:publish(mqttbasetopic .. "5","middle",0,0)
+				notBlocked=1
+                movedmiddle(6)
+			end
+		end		
 	end
 	)
 	
