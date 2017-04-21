@@ -37,52 +37,52 @@ function startWebServer()
 		conn:on("receive", function(conn,payload)
 			ssid, password, bssid_set, bssid = wifi.sta.getconfig()
 			if (payload:find("pin=OPEN1") ~= nil) then
-				open_valve(SOLENOID1)
+				open_valve(1)
 				sendWebPage(conn)
 			elseif (payload:find("pin=CLOSE1") ~= nil) then
-				close_valve(SOLENOID1)
+				close_valve(1)
 				sendWebPage(conn)
 			elseif (payload:find("pin=OPEN2") ~= nil) then
-				open_valve(SOLENOID2)
+				open_valve(2)
 				sendWebPage(conn)
 			elseif (payload:find("pin=CLOSE2") ~= nil) then
-				close_valve(SOLENOID2)
+				close_valve(2)
 				sendWebPage(conn)
 			elseif (payload:find("pin=OPEN3") ~= nil) then
-				open_valve(SOLENOID3)
+				open_valve(3)
 				sendWebPage(conn)
 			elseif (payload:find("pin=CLOSE3") ~= nil) then
-				close_valve(SOLENOID3)
+				close_valve(3)
 				sendWebPage(conn)
 			elseif (payload:find("pin=OPEN4") ~= nil) then
-				open_valve(SOLENOID4)
+				open_valve(4)
 				sendWebPage(conn)
 			elseif (payload:find("pin=CLOSE4") ~= nil) then
-				close_valve(SOLENOID4)
+				close_valve(4)
 				sendWebPage(conn)
 			elseif (payload:find("pin=OPEN5") ~= nil) then
-				open_valve(SOLENOID5)
+				open_valve(5)
 				sendWebPage(conn)
 			elseif (payload:find("pin=CLOSE5") ~= nil) then
-				close_valve(SOLENOID5)
+				close_valve(5)
 				sendWebPage(conn)
 			elseif (payload:find("pin=OPEN6") ~= nil) then
-				open_valve(SOLENOID6)
+				open_valve(6)
 				sendWebPage(conn)
 			elseif (payload:find("pin=CLOSE6") ~= nil) then
-				close_valve(SOLENOID6)
+				close_valve(6)
 				sendWebPage(conn)
 			elseif (payload:find("pin=OPEN7") ~= nil) then
-				open_valve(SOLENOID7)
+				open_valve(7)
 				sendWebPage(conn)
 			elseif (payload:find("pin=CLOSE7") ~= nil) then
-				close_valve(SOLENOID7)
+				close_valve(7)
 				sendWebPage(conn)
 			elseif (payload:find("pin=OPEN8") ~= nil) then
-				open_valve(SOLENOID8)
+				open_valve(8)
 				sendWebPage(conn)
 			elseif (payload:find("pin=CLOSE8") ~= nil) then
-				close_valve(SOLENOID8)
+				close_valve(8)
 				sendWebPage(conn)
 			elseif (payload:find("GET /") ~=nil) then
 				sendWebPage(conn)
@@ -100,6 +100,7 @@ function startWebServer()
 				if ((_POST.ssid~=nil) and (_POST.password~=nil) and (_POST.mqttserver~=nil) and (_POST.mqttbasetopic~=nil)) then
 					tmr.stop(1)
 					mqtttopic,l=string.gsub(_POST.mqttbasetopic,"%%2F","/")
+					print("im Formular: " .. _POST.mqttserver)
 					save_wifi_param(_POST.ssid,_POST.password,_POST.mqttserver,mqtttopic)
 					sendWebPage(conn)
 				else

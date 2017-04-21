@@ -7,7 +7,7 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 IP=$1
-FILES="wifi_config.lua webserver.lua wlancfg.lua init.lua"
+FILES="wifi_config.lua webserver.lua init.lua"
 for f in $FILES; do
     ./tcpFlash.py -t $IP -f $f
     if [ $? -ne 0 ]; then
