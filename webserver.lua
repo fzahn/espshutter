@@ -2,15 +2,18 @@
 
 function sendWebPage(conn)
 	local buf = "HTTP/1.1 200 OK\nServer: NodeMCU\nContent-Type: text/html\n\n"
-	buf = buf .. "<h1>Rolladensteuerung</h1>"
-	buf = buf .. "<p>Schlafzimmer <a href=\"?pin=UP1\"><button>auf</button></a>&nbsp;<a href=\"?pin=STOP1\"><button>stop</button></a>&nbsp<a href=\"?pin=DOWN1\"><button>ab</button></a></p>"
-	buf = buf .. "<p>Bad <a href=\"?pin=UP2\"><button>auf</button></a>&nbsp;<a href=\"?pin=STOP2\"><button>stop</button></a>&nbsp<a href=\"?pin=DOWN2\"><button>ab</button></a></p>"
-	buf = buf .. "<p>Wohnzimmer Nord <a href=\"?pin=UP3\"><button>auf</button></a>&nbsp;<a href=\"?pin=STOP3\"><button>stop</button></a>&nbsp<a href=\"?pin=DOWN3\"><button>ab</button></a></p>"
-	buf = buf .. "<p>Wohnzimmer West <a href=\"?pin=UP4\"><button>auf</button></a>&nbsp;<a href=\"?pin=STOP4\"><button>stop</button></a>&nbsp<a href=\"?pin=DOWN4\"><button>ab</button></a></p>"
-	buf = buf .. "<p>K&uuml;che Ost <a href=\"?pin=UP5\"><button>auf</button></a>&nbsp;<a href=\"?pin=STOP5\"><button>stop</button></a>&nbsp<a href=\"?pin=DOWN5\"><button>ab</button></a></p>"
-	buf = buf .. "<p>Gesamt <a href=\"?pin=UP6\"><button>auf</button></a>&nbsp;<a href=\"?pin=STOP6\"><button>stop</button></a>&nbsp<a href=\"?pin=DOWN6\"><button>ab</button></a></p>"
+	buf = buf .. "<h1>Gartenbew&auml;sserung</h1>"
+	buf = buf .. "<p>Hauptventil <a href=\"?pin=OPEN1\"><button>open</button></a>&nbsp;<a href=\"?pin=CLOSE1\"><button>close</button></a></p>"
+	buf = buf .. "<p>Ventil 2 <a href=\"?pin=OPEN2\"><button>open</button></a>&nbsp;<a href=\"?pin=CLOSE2\"><button>close</button></a></p>"
+	buf = buf .. "<p>Ventil 3 <a href=\"?pin=OPEN3\"><button>open</button></a>&nbsp;<a href=\"?pin=CLOSE3\"><button>close</button></a></p>"
+	buf = buf .. "<p>Ventil 4 <a href=\"?pin=OPEN4\"><button>open</button></a>&nbsp;<a href=\"?pin=CLOSE4\"><button>close</button></a></p>"
+	buf = buf .. "<p>Ventil 5 <a href=\"?pin=OPEN5\"><button>open</button></a>&nbsp;<a href=\"?pin=CLOSE5\"><button>close</button></a></p>"
+	buf = buf .. "<p>Ventil 6 <a href=\"?pin=OPEN6\"><button>open</button></a>&nbsp;<a href=\"?pin=CLOSE6\"><button>close</button></a></p>"
+	buf = buf .. "<p>Ventil 7 <a href=\"?pin=OPEN7\"><button>open</button></a>&nbsp;<a href=\"?pin=CLOSE7\"><button>close</button></a></p>"
+	buf = buf .. "<p>Ventil 8 <a href=\"?pin=OPEN8\"><button>open</button></a>&nbsp;<a href=\"?pin=CLOSE8\"><button>close</button></a></p>"		
 
 	conn:send(buf, function(conn1)
+        buf = nil
 		local buf2 = "<h2>Configuration</h2><form action=\"\" method=\"POST\">"
 		buf2 = buf2 .. "<label for=\"ssid\">WIFI-SSID: <input id=\"ssid\" name=\"ssid\" value=\"" .. ssid .. "\"></label><br/>"
 		buf2 = buf2 .. "<label for=\"password\">Password: <input id=\"password\" name=\"password\"></label><br/>"
@@ -33,59 +36,53 @@ function startWebServer()
 	srv:listen(80,function(conn)
 		conn:on("receive", function(conn,payload)
 			ssid, password, bssid_set, bssid = wifi.sta.getconfig()
-			if (payload:find("pin=UP1") ~= nil) then
-				moveup(1)
+			if (payload:find("pin=OPEN1") ~= nil) then
+				open_valve(SOLENOID1)
 				sendWebPage(conn)
-			elseif (payload:find("pin=DOWN1") ~= nil) then
-				movedown(1)
+			elseif (payload:find("pin=CLOSE1") ~= nil) then
+				close_valve(SOLENOID1)
 				sendWebPage(conn)
-			elseif (payload:find("pin=STOP1") ~= nil) then
-				movestop(1)
-				sendWebPage(conn)	
-			elseif (payload:find("pin=UP2") ~= nil) then
-				moveup(2)
+			elseif (payload:find("pin=OPEN2") ~= nil) then
+				open_valve(SOLENOID2)
 				sendWebPage(conn)
-			elseif (payload:find("pin=DOWN2") ~= nil) then
-				movedown(2)
+			elseif (payload:find("pin=CLOSE2") ~= nil) then
+				close_valve(SOLENOID2)
 				sendWebPage(conn)
-			elseif (payload:find("pin=STOP2") ~= nil) then
-				movestop(2)
+			elseif (payload:find("pin=OPEN3") ~= nil) then
+				open_valve(SOLENOID3)
 				sendWebPage(conn)
-			elseif (payload:find("pin=UP3") ~= nil) then
-				moveup(3)
+			elseif (payload:find("pin=CLOSE3") ~= nil) then
+				close_valve(SOLENOID3)
 				sendWebPage(conn)
-			elseif (payload:find("pin=DOWN3") ~= nil) then
-				movedown(3)
+			elseif (payload:find("pin=OPEN4") ~= nil) then
+				open_valve(SOLENOID4)
 				sendWebPage(conn)
-			elseif (payload:find("pin=STOP3") ~= nil) then
-				movestop(3)
+			elseif (payload:find("pin=CLOSE4") ~= nil) then
+				close_valve(SOLENOID4)
 				sendWebPage(conn)
-			elseif (payload:find("pin=UP4") ~= nil) then
-				moveup(4)
+			elseif (payload:find("pin=OPEN5") ~= nil) then
+				open_valve(SOLENOID5)
 				sendWebPage(conn)
-			elseif (payload:find("pin=DOWN4") ~= nil) then
-				movedown(4)
+			elseif (payload:find("pin=CLOSE5") ~= nil) then
+				close_valve(SOLENOID5)
 				sendWebPage(conn)
-			elseif (payload:find("pin=STOP4") ~= nil) then
-				movestop(4)
+			elseif (payload:find("pin=OPEN6") ~= nil) then
+				open_valve(SOLENOID6)
 				sendWebPage(conn)
-			elseif (payload:find("pin=UP5") ~= nil) then
-				moveup(5)
+			elseif (payload:find("pin=CLOSE6") ~= nil) then
+				close_valve(SOLENOID6)
 				sendWebPage(conn)
-			elseif (payload:find("pin=DOWN5") ~= nil) then
-				movedown(5)
+			elseif (payload:find("pin=OPEN7") ~= nil) then
+				open_valve(SOLENOID7)
 				sendWebPage(conn)
-			elseif (payload:find("pin=STOP5") ~= nil) then
-				movestop(5)
+			elseif (payload:find("pin=CLOSE7") ~= nil) then
+				close_valve(SOLENOID7)
 				sendWebPage(conn)
-			elseif (payload:find("pin=UP6") ~= nil) then
-				moveup(6)
+			elseif (payload:find("pin=OPEN8") ~= nil) then
+				open_valve(SOLENOID8)
 				sendWebPage(conn)
-			elseif (payload:find("pin=DOWN6") ~= nil) then
-				movedown(6)
-				sendWebPage(conn)
-			elseif (payload:find("pin=STOP6") ~= nil) then
-				movestop(6)
+			elseif (payload:find("pin=CLOSE8") ~= nil) then
+				close_valve(SOLENOID8)
 				sendWebPage(conn)
 			elseif (payload:find("GET /") ~=nil) then
 				sendWebPage(conn)

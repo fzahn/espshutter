@@ -13,149 +13,72 @@ end
 
 ---push_button_Functions
 
-BUTTON_CHANNEL=0
-BUTTON_DOWN=1
-BUTTON_STOP=2
-BUTTON_UP=3
-CURRENTCHANNEL=1
+SOLENOID1=8
+SOLENOID2=4
+SOLENOID3=3
+SOLENOID4=1
+SOLENOID5=7
+SOLENOID6=6
+SOLENOID7=5
+SOLENOID8=0
 
--- variable to prevent simultaneous access to selectChannel in the move-functions
-notBlocked=1
 
 
-function pressButton(button) 
-  tmr.alarm(0, 100, tmr.ALARM_SINGLE, function()
-    gpio.write(button, gpio.LOW)
-  end)
-  gpio.write(button, gpio.HIGH)
+
+function open_valve(solenoid)
+	gpio.write(solenoid,gpio.HIGH)
+	m:publish(mqttbasetopic .. solenoid .."/value", "open",0,0)
+end
+function close_valve(solenoid)
+	gpio.write(solenoid,gpio.LOW)
+	m:publish(mqttbasetopic .. solenoid .."/value", "close",0,0)
 end
 
 
-function selectChannel(channel)
-   if (CURRENTCHANNEL ~= channel) then pressButton(BUTTON_CHANNEL) end
-	tmr.alarm(1, 200, tmr.ALARM_AUTO, function()
-		if (CURRENTCHANNEL ~= channel) then
-			pressButton(BUTTON_CHANNEL)
-			CURRENTCHANNEL=CURRENTCHANNEL + 1
-			if (CURRENTCHANNEL==7) then CURRENTCHANNEL=1 end
-		else tmr.unregister(1) end
-	end
-	)
-end
-
-
-
-
-
-function moveup(channel)
-    if (notBlocked==1) then
-		 notBlocked=0
-       selectChannel(channel)
-	    tmr.alarm(3, 2500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_UP) notBlocked=1 end)
-    end
-end
-
-function movedown(channel)
-	if (notBlocked==1) then
-		notBlocked=0
-		selectChannel(channel)
-		tmr.alarm(3, 2500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_DOWN)  notBlocked=1 end)
-	end
-end
-
-function movestop(channel)
-	if (notBlocked==1) then
-		notBlocked=0
-		selectChannel(channel)
-		tmr.alarm(3, 2500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_STOP) notBlocked=1 end)
-	end
-end
-
-function movemiddle(channel)
-	if (notBlocked==1) then
-		notBlocked=0
-		selectChannel(channel)
-		tmr.alarm(3, 2500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_DOWN) end)
-		tmr.alarm(4, 3000, tmr.ALARM_SINGLE, function() pressButton(BUTTON_DOWN) notBlocked=1 end)
-	end
-end
 --MQTT Subsystem
 function initmqtt()
 	m = mqtt.Client("ESP8266", 120, "user", "pass")
 	function mqttsubscribe()
-		notBlocked=0
-		m:subscribe(mqttbasetopic .. "1",0, function() print("subscribe success") end)
-		m:subscribe(mqttbasetopic .. "2",0, function() print("subscribe success") end)
-		m:subscribe(mqttbasetopic .. "3",0, function() print("subscribe success") end)
-		m:subscribe(mqttbasetopic .. "4",0, function() print("subscribe success") end)
-		m:subscribe(mqttbasetopic .. "5",0, function() print("subscribe success") end)
-		m:subscribe(mqttbasetopic .. "6",0, function() print("subscribe success") end)
-		tmr.alarm(1,2500, tmr.ALARM_SINGLE, function() notBlocked=1 end)
+		m:subscribe(mqttbasetopic .. "1/command",0, function() print("subscribe success") end)
+		m:subscribe(mqttbasetopic .. "2/command",0, function() print("subscribe success") end)
+		m:subscribe(mqttbasetopic .. "3/command",0, function() print("subscribe success") end)
+		m:subscribe(mqttbasetopic .. "4/command",0, function() print("subscribe success") end)
+		m:subscribe(mqttbasetopic .. "5/command",0, function() print("subscribe success") end)
+		m:subscribe(mqttbasetopic .. "6/command",0, function() print("subscribe success") end)
+		m:subscribe(mqttbasetopic .. "7/command",0, function() print("subscribe success") end)
+		m:subscribe(mqttbasetopic .. "8/command",0, function() print("subscribe success") end)
+		m:publish(mqttbasetopic .. "1" .."/value", "close",0,0)
+		m:publish(mqttbasetopic .. "2" .."/value", "close",0,0)
+		m:publish(mqttbasetopic .. "3" .."/value", "close",0,0)
+		m:publish(mqttbasetopic .. "4" .."/value", "close",0,0)
+		m:publish(mqttbasetopic .. "5" .."/value", "close",0,0)
+		m:publish(mqttbasetopic .. "6" .."/value", "close",0,0)
+		m:publish(mqttbasetopic .. "7" .."/value", "close",0,0)
+		m:publish(mqttbasetopic .. "8" .."/value", "close",0,0)
 	end
 	m:on("connect", mqttsubscribe)
 	
 	m:on("message", function(client,topic,data)
-		if ((data=="up") and (notBlocked==1)) then
+		if (data=="open") then
 			print("Topic: " .. topic .. " Data: " .. data)
-			if topic==mqttbasetopic .. "1" then moveup(1) end
-			if topic==mqttbasetopic .. "2" then moveup(2) end
-			if topic==mqttbasetopic .. "3" then moveup(3) end
-			if topic==mqttbasetopic .. "4" then moveup(4) end
-			if topic==mqttbasetopic .. "5" then moveup(5) end
-			if topic==mqttbasetopic .. "6" then
-				notBlocked=0
-				m:publish(mqttbasetopic .. "1","up",0,0)
-				m:publish(mqttbasetopic .. "2","up",0,0)
-				m:publish(mqttbasetopic .. "3","up",0,0)
-				m:publish(mqttbasetopic .. "4","up",0,0)
-				m:publish(mqttbasetopic .. "5","up",0,0)
-				notBlocked=1
-            moveup(6)
-			end
-		elseif ((data=="down") and (notBlocked==1)) then
+			if topic==mqttbasetopic .. "1/action" then open_valve(SOLENOID1) end
+			if topic==mqttbasetopic .. "2/action" then open_valve(SOLENOID2) end
+			if topic==mqttbasetopic .. "3/action" then open_valve(SOLENOID3) end
+			if topic==mqttbasetopic .. "4/action" then open_valve(SOLENOID4) end
+			if topic==mqttbasetopic .. "5/action" then open_valve(SOLENOID5) end
+			if topic==mqttbasetopic .. "6/action" then open_valve(SOLENOID6) end
+			if topic==mqttbasetopic .. "7/action" then open_valve(SOLENOID7) end
+			if topic==mqttbasetopic .. "8/action" then open_valve(SOLENOID8) end			
+		elseif (data=="close") then
 			print("Topic: " .. topic .. " Data: " .. data)
-			if topic==mqttbasetopic .. "1" then movedown(1) end
-			if topic==mqttbasetopic .. "2" then movedown(2) end
-			if topic==mqttbasetopic .. "3" then movedown(3) end
-			if topic==mqttbasetopic .. "4" then movedown(4) end
-			if topic==mqttbasetopic .. "5" then movedown(5) end
-			if topic==mqttbasetopic .. "6" then
-				notBlocked=0
-				m:publish(mqttbasetopic .. "1","down",0,0)
-				m:publish(mqttbasetopic .. "2","down",0,0)
-				m:publish(mqttbasetopic .. "3","down",0,0)
-				m:publish(mqttbasetopic .. "4","down",0,0)
-				m:publish(mqttbasetopic .. "5","down",0,0)
-				notBlocked=1
-            movedown(6)
-			end
-		elseif ((data=="stop") and (notBlocked==1)) then
-			print("Topic: " .. topic .. " Data: " .. data)
-			if topic==mqttbasetopic .. "1" then movestop(1) end
-			if topic==mqttbasetopic .. "2" then movestop(2) end
-			if topic==mqttbasetopic .. "3" then movestop(3) end
-			if topic==mqttbasetopic .. "4" then movestop(4) end
-			if topic==mqttbasetopic .. "5" then movestop(5) end
-			if topic==mqttbasetopic .. "6" then
-            movestop(6)
-			end			
-		elseif ((data=="middle") and (notBlocked==1)) then
-			print("Topic: " .. topic .. " Data: " .. data)
-			if topic==mqttbasetopic .. "1" then movemiddle(1) end
-			if topic==mqttbasetopic .. "2" then movemiddle(2) end
-			if topic==mqttbasetopic .. "3" then movemiddle(3) end
-			if topic==mqttbasetopic .. "4" then movemiddle(4) end
-			if topic==mqttbasetopic .. "5" then movemiddle(5) end
-			if topic==mqttbasetopic .. "6" then
-				notBlocked=0
-				m:publish(mqttbasetopic .. "1","middle",0,0)
-				m:publish(mqttbasetopic .. "2","middle",0,0)
-				m:publish(mqttbasetopic .. "3","middle",0,0)
-				m:publish(mqttbasetopic .. "4","middle",0,0)
-				m:publish(mqttbasetopic .. "5","middle",0,0)
-				notBlocked=1
-            movemiddle(6)
-			end
+			if topic==mqttbasetopic .. "1/action" then close_valve(SOLENOID1) end
+			if topic==mqttbasetopic .. "2/action" then close_valve(SOLENOID2) end
+			if topic==mqttbasetopic .. "3/action" then close_valve(SOLENOID3) end
+			if topic==mqttbasetopic .. "4/action" then close_valve(SOLENOID4) end
+			if topic==mqttbasetopic .. "5/action" then close_valve(SOLENOID5) end
+			if topic==mqttbasetopic .. "6/action" then close_valve(SOLENOID6) end
+			if topic==mqttbasetopic .. "7/action" then close_valve(SOLENOID7) end
+			if topic==mqttbasetopic .. "8/action" then close_valve(SOLENOID8) end		
 		end		
 	end
 	)
@@ -184,14 +107,22 @@ end
 
 
 function init_gpio()
-	gpio.mode(0, gpio.OUTPUT)
-	gpio.mode(1, gpio.OUTPUT)
-	gpio.mode(2, gpio.OUTPUT)
-	gpio.mode(3, gpio.OUTPUT)
-	gpio.write(0, gpio.LOW)
-	gpio.write(1, gpio.LOW)
-	gpio.write(2, gpio.LOW)
-	gpio.write(3, gpio.LOW)
+	gpio.mode(SOLENOID1, gpio.OUTPUT)
+	gpio.mode(SOLENOID2, gpio.OUTPUT)
+	gpio.mode(SOLENOID3, gpio.OUTPUT)
+	gpio.mode(SOLENOID4, gpio.OUTPUT)
+	gpio.mode(SOLENOID5, gpio.OUTPUT)
+	gpio.mode(SOLENOID6, gpio.OUTPUT)
+	gpio.mode(SOLENOID7, gpio.OUTPUT)
+	gpio.mode(SOLENOID8, gpio.OUTPUT)
+	gpio.write(SOLENOID1, gpio.LOW)
+	gpio.write(SOLENOID2, gpio.LOW)
+	gpio.write(SOLENOID3, gpio.LOW)
+	gpio.write(SOLENOID4, gpio.LOW)
+	gpio.write(SOLENOID5, gpio.LOW)
+	gpio.write(SOLENOID6, gpio.LOW)
+	gpio.write(SOLENOID7, gpio.LOW)
+	gpio.write(SOLENOID8, gpio.LOW)
 end
 
 
@@ -212,11 +143,10 @@ tmr.alarm(0, 100, 1, function()
     if(connect_counter == 300) then
       tmr.stop(0)
       print("Starting WiFi setup mode")
-      ws2812.write(1,string.char(0,20,20):rep(60))
       enduser_setup.start(
        function()
         ssid,password,bssid_set,bssid=wifi.sta.getconfig()
-        save_wifi_param(ssid,password,"192.168.0.1","/rolladen/");
+        save_wifi_param(ssid,password,"192.168.0.1","/garten/irrigation/");
         print("Connected to wifi as:" .. wifi.sta.getip());
         print("Saved parameters in wlancfg.lua");
         init_logic();
