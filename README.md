@@ -1,9 +1,18 @@
-#ESP Shutter Control
+#ESP Irrigation Interface
 
-This project was created to adapt a ESP8266 SoC with an existing Remote Control for controlling Schellenberg smart roller shutter drives (Prem 10/20/40)
-The remote is a 5-channel remote with 4 buttons: UP/STOP/DOWN/change channel
+This code is used to control 8 solenoid valves via ESP8266.
+The solenoids of the valves are connected via ULN2803 darlington array to the GPIOs of the ESP8266
 
-The ESP has been connected to the remote control with a CD4066 chip, that is used as bipoloar switch to replace the existing four buttons.
-The ESP uses GPIO 0-4 to switch the CD4066 chip.
+The watering system has one main valve, which is connected to  valve1. This valve always has to be opened, when another valve is opened
 
 
+They are attached as follows:
+
+GPIO15 -> Valve 1 (main valve)
+GPIO2  -> Valve 2
+GPIO0  -> Valve 3
+GPIO5  -> Valve 4
+GPIO13 -> Valve 5
+GPIO12 -> Valve 6
+GPIO14 -> Valve 7
+GPIO16 -> Valve 8
