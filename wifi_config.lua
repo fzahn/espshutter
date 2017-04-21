@@ -14,9 +14,9 @@ end
 ---push_button_Functions
 
 solenoids = {}
-solenoids[1]=8
-solenoids[2]=4
-solenoids[3]=3
+solenoids[1]=12
+solenoids[2]=8
+solenoids[3]=2
 solenoids[4]=1
 solenoids[5]=7
 solenoids[6]=6

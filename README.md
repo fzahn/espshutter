@@ -8,9 +8,9 @@ The watering system has one main valve, which is connected to  valve1. This valv
 
 They are attached as follows:
 
-GPIO15 -> Valve 1 (main valve)
-GPIO2  -> Valve 2
-GPIO0  -> Valve 3
+GPIO10 -> Valve 1 (main valve)
+GPIO15  -> Valve 2
+GPIO4  -> Valve 3
 GPIO5  -> Valve 4
 GPIO13 -> Valve 5
 GPIO12 -> Valve 6

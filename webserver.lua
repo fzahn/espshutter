@@ -128,7 +128,7 @@ function startWebServer()
 					global_c=nil
 				end
 				)
-				print("Welcome to Rolladen-ESP")
+				print("Welcome on the ESP-Irrigation Controller")
 
 			end
 		end
