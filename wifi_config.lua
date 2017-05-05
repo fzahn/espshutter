@@ -27,27 +27,19 @@ solenoids[8]=0
 function open_valve(solenoid)
 	gpio.write(solenoids[solenoid],gpio.HIGH)
 	m:publish(mqttbasetopic .. solenoid .."/value", "open",0,0)
-	print("Valve " .. solenoid .. " :opened")
+	print("Valve " .. solenoid .. " :opened\n")
 end
 function close_valve(solenoid)
 	gpio.write(solenoids[solenoid],gpio.LOW)
 	m:publish(mqttbasetopic .. solenoid .."/value", "close",0,0)
-	print("Valve " .. solenoid .. " :closed")
+	print("Valve " .. solenoid .. " :closed\n")
 end
 
 
 --MQTT Subsystem
 function initmqtt()
 	m = mqtt.Client("GARDENIRRIGATION", 120, "user", "pass")
-	function mqttsubscribe()
-        m:publish(mqttbasetopic .. "1/command", "close",0,0)
-        m:publish(mqttbasetopic .. "2/command", "close",0,0)
-        m:publish(mqttbasetopic .. "3/command", "close",0,0)
-        m:publish(mqttbasetopic .. "4/command", "close",0,0)
-        m:publish(mqttbasetopic .. "5/command", "close",0,0)
-        m:publish(mqttbasetopic .. "6/command", "close",0,0)
-        m:publish(mqttbasetopic .. "7/command", "close",0,0)
-        m:publish(mqttbasetopic .. "8/command", "close",0,0)     
+	function mqttsubscribe()    
 		m:subscribe(mqttbasetopic .. "1/command",0, function() print("subscribe success") end)
 		m:subscribe(mqttbasetopic .. "2/command",0, function() print("subscribe success") end)
 		m:subscribe(mqttbasetopic .. "3/command",0, function() print("subscribe success") end)
@@ -56,20 +48,11 @@ function initmqtt()
 		m:subscribe(mqttbasetopic .. "6/command",0, function() print("subscribe success") end)
 		m:subscribe(mqttbasetopic .. "7/command",0, function() print("subscribe success") end)
 		m:subscribe(mqttbasetopic .. "8/command",0, function() print("subscribe success") end) 
-		m:publish(mqttbasetopic .. "1/value", "close",0,0)
-		m:publish(mqttbasetopic .. "2/value", "close",0,0)
-		m:publish(mqttbasetopic .. "3/value", "close",0,0)
-		m:publish(mqttbasetopic .. "4/value", "close",0,0)
-		m:publish(mqttbasetopic .. "5/value", "close",0,0)
-		m:publish(mqttbasetopic .. "6/value", "close",0,0)
-		m:publish(mqttbasetopic .. "7/value", "close",0,0)
-		m:publish(mqttbasetopic .. "8/value", "close",0,0)
 	end
 	m:on("connect", mqttsubscribe)
 	
 	m:on("message", function(client,topic,data)
 		if (data=="open") then
-			print("Topic: " .. topic .. " Data: " .. data)
 			if topic==mqttbasetopic .. "1/command" then open_valve(1) end
 			if topic==mqttbasetopic .. "2/command" then open_valve(2) end
 			if topic==mqttbasetopic .. "3/command" then open_valve(3) end
@@ -79,7 +62,6 @@ function initmqtt()
 			if topic==mqttbasetopic .. "7/command" then open_valve(7) end
 			if topic==mqttbasetopic .. "8/command" then open_valve(8) end			
 		elseif (data=="close") then
-			print("Topic: " .. topic .. " Data: " .. data)
 			if topic==mqttbasetopic .. "1/command" then close_valve(1) end
 			if topic==mqttbasetopic .. "2/command" then close_valve(2) end
 			if topic==mqttbasetopic .. "3/command" then close_valve(3) end
@@ -110,6 +92,17 @@ function init_logic()
  dofile("webserver.lc")
  startWebServer()
  initmqtt()
+ tmr.alarm(2, 1000, 0, function()
+    m:publish(mqttbasetopic .. "1/command", "close",0,0)
+    m:publish(mqttbasetopic .. "2/command", "close",0,0)
+    m:publish(mqttbasetopic .. "3/command", "close",0,0)
+    m:publish(mqttbasetopic .. "4/command", "close",0,0)
+    m:publish(mqttbasetopic .. "5/command", "close",0,0)
+    m:publish(mqttbasetopic .. "6/command", "close",0,0)
+    m:publish(mqttbasetopic .. "7/command", "close",0,0)
+    m:publish(mqttbasetopic .. "8/command", "close",0,0) 
+	end
+ )
 --register MDNS
  mdns.register("gartenbewaesserung", { description="ESP Gartenbewaesserung", service="http", port="80" }) 
 end
