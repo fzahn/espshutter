@@ -25,15 +25,42 @@ solenoids[8]=0
 
 
 function open_valve(solenoid)
-	gpio.write(solenoids[solenoid],gpio.HIGH)
-	m:publish(mqttbasetopic .. solenoid .."/value", "open",0,0)
-	print("Valve " .. solenoid .. " :opened\n")
+	if (solenoid>1) then	
+		gpio.write(solenoids[solenoid],gpio.HIGH)
+		m:publish(mqttbasetopic .. solenoid .."/value", "open",0,0)
+		print("Valve " .. solenoid .. " :opened\n")
+	else
+		gpio.write(solenoids[solenoid],gpio.HIGH)
+		m:publish(mqttbasetopic .. solenoid .."/value", "open",0,0)
+		print("Valve " .. solenoid .. " :opened and shutdown timer started\n")
+		minuten=0
+		tmr.alarm(1,60000,tmr.ALARM_AUTO,function()
+			if (minuten<59) then
+				minuten=minuten+1
+				print("Valve 1 will be opened for the next " .. 60-minuten .. " minutes!\n")			
+			else
+				print("Valve 1 maximum runtime reached -> shutdown")
+				close_valve(1)
+				tmr.stop(1)
+				tmr.unregister(1)
+			end
+		end
+		)
+	end
 end
+
+
 function close_valve(solenoid)
 	gpio.write(solenoids[solenoid],gpio.LOW)
 	m:publish(mqttbasetopic .. solenoid .."/value", "close",0,0)
 	print("Valve " .. solenoid .. " :closed\n")
+	if(solenoid==1) then
+		tmr.stop(1)
+		tmr.unregister(1)
+	end
 end
+
+
 
 
 --MQTT Subsystem
