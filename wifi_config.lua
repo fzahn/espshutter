@@ -1,12 +1,13 @@
 --Function to save WiFi-parameters into file-system as wlancfg.lua
-function save_wifi_param(ssid,password,mqttserver,mqttbasetopic)
+function save_wifi_param(ssid,password,mqttserver,mqttbasetopic,zeit1,zeit2,zeit3,zeit4,zeit5)
  file.remove("wlancfg.lua");
  file.open("wlancfg.lua","w+");
  w = file.writeline('-- Tell the chip to connect to thi access point');
  w = file.writeline('wifi.setmode(wifi.STATION)');
  w = file.writeline('wifi.sta.config("' .. ssid .. '","' .. password .. '")');
  w = file.writeline('mqttserver="' .. mqttserver ..'"');
- w = file.writeline('mqttbasetopic="' .. mqttbasetopic ..'"'); 
+ w = file.writeline('mqttbasetopic="' .. mqttbasetopic ..'"');
+ w = file.writeline('zeiten={'.. zeit1 .. ',' .. zeit2 ..',' .. zeit3 .. ',' .. zeit4 .. ',' .. zeit5 ..'}');
  file.close();
  ssid,password,bssid_set,bssid=nil,nil,nil,nil
 end
@@ -18,6 +19,7 @@ BUTTON_DOWN=1
 BUTTON_STOP=2
 BUTTON_UP=3
 CURRENTCHANNEL=1
+HEIGHTS = {0,0,0,0,0}
 
 -- variable to prevent simultaneous access to selectChannel in the move-functions
 notBlocked=1
@@ -50,8 +52,14 @@ end
 function moveup(channel)
     if (notBlocked==1) then
 		 notBlocked=0
-       selectChannel(channel)
-	    tmr.alarm(3, 2500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_UP) notBlocked=1 end)
+         selectChannel(channel)
+	     tmr.alarm(3, 1500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_UP) notBlocked=1 end)
+		 if (channel==6) then
+			 HEIGHTS = {0,0,0,0,0}
+		 else
+			 HEIGHTS[channel] = 0
+		 end
+			
     end
 end
 
@@ -59,7 +67,12 @@ function movedown(channel)
 	if (notBlocked==1) then
 		notBlocked=0
 		selectChannel(channel)
-		tmr.alarm(3, 2500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_DOWN)  notBlocked=1 end)
+		tmr.alarm(3, 1500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_DOWN)  notBlocked=1 end)
+	 if (channel==6) then
+		 HEIGHTS = {100,100,100,100,100}
+	 else
+		 HEIGHTS[channel] = 100
+	 end
 	end
 end
 
@@ -67,18 +80,46 @@ function movestop(channel)
 	if (notBlocked==1) then
 		notBlocked=0
 		selectChannel(channel)
-		tmr.alarm(3, 2500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_STOP) notBlocked=1 end)
+		tmr.alarm(3, 1500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_STOP) notBlocked=1 end)
+	 	if (channel==6) then
+		 	HEIGHTS = {50,50,50,50,50}
+	 	else
+		 	HEIGHTS[channel] = 50
+	 	end
 	end
 end
 
-function movemiddle(channel)
-	if (notBlocked==1) then
+function movepercent(channel,percent)
+	if ((notBlocked==1) and (HEIGHTS[channel]==0)) then
+		tmr.unregister(4)
+		tmr.unregister(5)
 		notBlocked=0
 		selectChannel(channel)
-		tmr.alarm(3, 2500, tmr.ALARM_SINGLE, function() pressButton(BUTTON_DOWN) end)
-		tmr.alarm(4, 3000, tmr.ALARM_SINGLE, function() pressButton(BUTTON_DOWN) notBlocked=1 end)
+		tmr.alarm(4, 1500, tmr.ALARM_SINGLE, function()
+			pressButton(BUTTON_DOWN)
+			tmr.alarm(5,zeiten[channel]*10*percent, tmr.ALARM_SINGLE, function()
+				pressButton(BUTTON_STOP)
+			end)
+			notBlocked=1
+		end)
+		HEIGHTS[channel]=percent
+	else
+		if (notBlocked==1) then
+			moveup(channel)
+			tmr.unregister(4)
+			tmr.alarm(4,zeiten[channel]*1500,tmr.ALARM_SINGLE, function()
+				pressButton(BUTTON_DOWN)
+				tmr.unregister(5)
+				tmr.alarm(5,zeiten[channel]*10*percent, tmr.ALARM_SINGLE, function()
+					pressButton(BUTTON_STOP)
+					notBlocked=1
+				end)
+			end)
+		end
 	end
 end
+
+
 --MQTT Subsystem
 function initmqtt()
 	m = mqtt.Client("ESP8266", 120, "user", "pass")
@@ -127,7 +168,7 @@ function initmqtt()
 				m:publish(mqttbasetopic .. "4","down",0,0)
 				m:publish(mqttbasetopic .. "5","down",0,0)
 				notBlocked=1
-            movedown(6)
+                movedown(6)
 			end
 		elseif ((data=="stop") and (notBlocked==1)) then
 			print("Topic: " .. topic .. " Data: " .. data)
@@ -139,22 +180,21 @@ function initmqtt()
 			if topic==mqttbasetopic .. "6" then
             movestop(6)
 			end			
-		elseif ((data=="middle") and (notBlocked==1)) then
+		elseif  (notBlocked==1) then
 			print("Topic: " .. topic .. " Data: " .. data)
-			if topic==mqttbasetopic .. "1" then movemiddle(1) end
-			if topic==mqttbasetopic .. "2" then movemiddle(2) end
-			if topic==mqttbasetopic .. "3" then movemiddle(3) end
-			if topic==mqttbasetopic .. "4" then movemiddle(4) end
-			if topic==mqttbasetopic .. "5" then movemiddle(5) end
+			if topic==mqttbasetopic .. "1" then movepercent(1,tonumber(data)) end
+			if topic==mqttbasetopic .. "2" then movepercent(2,tonumber(data)) end
+			if topic==mqttbasetopic .. "3" then movepercent(3,tonumber(data)) end
+			if topic==mqttbasetopic .. "4" then movepercent(4,tonumber(data)) end
+			if topic==mqttbasetopic .. "5" then movepercent(5,tonumber(data)) end
 			if topic==mqttbasetopic .. "6" then
 				notBlocked=0
-				m:publish(mqttbasetopic .. "1","middle",0,0)
-				m:publish(mqttbasetopic .. "2","middle",0,0)
-				m:publish(mqttbasetopic .. "3","middle",0,0)
-				m:publish(mqttbasetopic .. "4","middle",0,0)
-				m:publish(mqttbasetopic .. "5","middle",0,0)
+				m:publish(mqttbasetopic .. "1",data,0,0)
+				m:publish(mqttbasetopic .. "2",data,0,0)
+				m:publish(mqttbasetopic .. "3",data,0,0)
+				m:publish(mqttbasetopic .. "4",data,0,0)
+				m:publish(mqttbasetopic .. "5",data,0,0)
 				notBlocked=1
-            movemiddle(6)
 			end
 		end		
 	end
@@ -212,11 +252,10 @@ tmr.alarm(0, 100, 1, function()
     if(connect_counter == 300) then
       tmr.stop(0)
       print("Starting WiFi setup mode")
-      ws2812.write(1,string.char(0,20,20):rep(60))
       enduser_setup.start(
        function()
         ssid,password,bssid_set,bssid=wifi.sta.getconfig()
-        save_wifi_param(ssid,password,"192.168.0.1","/rolladen/");
+        save_wifi_param(ssid,password,"192.168.0.1","/rolladen/",5,5,5,5,5);
         print("Connected to wifi as:" .. wifi.sta.getip());
         print("Saved parameters in wlancfg.lua");
         init_logic();

@@ -7,3 +7,4 @@ The ESP has been connected to the remote control with a CD4066 chip, that is use
 The ESP uses GPIO 0-4 to switch the CD4066 chip.
 
 
+The ESP can be configured using webinterface with MDNS-URL http://rolladen.local after it has gone through AUTO-Setup routine

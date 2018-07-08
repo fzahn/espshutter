@@ -16,6 +16,8 @@ function sendWebPage(conn)
 		buf2 = buf2 .. "<label for=\"password\">Password: <input id=\"password\" name=\"password\"></label><br/>"
 		buf2 = buf2 .. "<label for=\"mqttserver\">MQTT Server: <input id=\"mqttserver\" name=\"mqttserver\" value=\"" .. mqttserver .. "\"></label><br/>"
 		buf2 = buf2 .. "<label for=\"mqttbasetopic\">MQTT Topic: <input id=\"mqttbasetopic\" name=\"mqttbasetopic\" value=\"" .. mqttbasetopic .. "\"></label><br/>"
+		buf2 = buf2 .. "<label for=\"Zeiten\">Laufzeiten Kanal 1-5: <input id=\"zeit1\" name=\"zeit1\" value=\"" .. zeiten[1] .. "\"><input id=\"zeit2\" name=\"zeit2\" value=\"" .. zeiten[2] .. "\"><input id=\"zeit3\" name=\"zeit3\" value=\""
+		buf2 = buf2 .. zeiten[3] .. "\"><input id=\"zeit4\" name=\"zeit4\" value=\"" .. zeiten[4] .. "\"><input id=\"zeit5\" name=\"zeit5\" value=\"" .. zeiten[5] .. "\"></label><br/>"
 		buf2 = buf2 .. "<input type=\"submit\" value=\"Save Config\"></form>"												
 		buf2 = buf2 .. "\n</body></html>"
 		conn1:send(buf2, function(sk)
@@ -103,7 +105,7 @@ function startWebServer()
 				if ((_POST.ssid~=nil) and (_POST.password~=nil) and (_POST.mqttserver~=nil) and (_POST.mqttbasetopic~=nil)) then
 					tmr.stop(1)
 					mqtttopic,l=string.gsub(_POST.mqttbasetopic,"%%2F","/")
-					save_wifi_param(_POST.ssid,_POST.password,_POST.mqttserver,mqtttopic)
+					save_wifi_param(_POST.ssid,_POST.password,_POST.mqttserver,mqtttopic,_POST.zeit1,_POST.zeit2,_POST.zeit3,_POST.zeit4,_POST.zeit5)
 					sendWebPage(conn)
 				else
 					ssid, password, bssid_set, bssid = wifi.sta.getconfig()
